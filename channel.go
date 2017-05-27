@@ -15,6 +15,8 @@ type PoolConfig struct {
 	MaxCap int
 	//生成连接的方法
 	Factory func() (interface{}, error)
+	//是否自动关闭链接
+	AutoClose bool
 	//关闭链接的方法
 	Close func(interface{}) error
 	//链接最大空闲时间，超过该事件则将失效
@@ -26,6 +28,7 @@ type channelPool struct {
 	mu          sync.Mutex
 	conns       chan *idleConn
 	factory     func() (interface{}, error)
+	autoClose   bool
 	close       func(interface{}) error
 	idleTimeout time.Duration
 }
@@ -44,6 +47,7 @@ func NewChannelPool(poolConfig *PoolConfig) (Pool, error) {
 	c := &channelPool{
 		conns:       make(chan *idleConn, poolConfig.MaxCap),
 		factory:     poolConfig.Factory,
+		autoClose:   poolConfig.AutoClose,
 		close:       poolConfig.Close,
 		idleTimeout: poolConfig.IdleTimeout,
 	}
