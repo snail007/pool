@@ -84,14 +84,17 @@ func (c *channelPool) Get() (interface{}, error) {
 			if wrapConn == nil {
 				return nil, ErrClosed
 			}
-			//判断是否超时，超时则丢弃
-			if timeout := c.idleTimeout; timeout > 0 {
-				if wrapConn.t.Add(timeout).Before(time.Now()) {
-					//丢弃并关闭该链接
-					c.Close(wrapConn.conn)
-					continue
+			if c.autoClose {
+				//判断是否超时，超时则丢弃
+				if timeout := c.idleTimeout; timeout > 0 {
+					if wrapConn.t.Add(timeout).Before(time.Now()) {
+						//丢弃并关闭该链接
+						c.Close(wrapConn.conn)
+						continue
+					}
 				}
 			}
+
 			return wrapConn.conn, nil
 		default:
 			conn, err := c.factory()
