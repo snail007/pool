@@ -94,6 +94,7 @@ func (c *channelPool) Get() (interface{}, error) {
 					}
 				}
 			}
+
 			return wrapConn.conn, nil
 		default:
 			conn, err := c.factory()
